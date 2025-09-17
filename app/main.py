@@ -1,6 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
-from config import settings
+from config.config import settings
 from contextlib import asynccontextmanager
 
 from models import db_helper, Base
