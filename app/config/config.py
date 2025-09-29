@@ -3,6 +3,7 @@ from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
 )
+from fastapi.staticfiles import StaticFiles
 
 
 class RunConfig(BaseModel):

@@ -14,48 +14,46 @@ router = APIRouter(
 UPLOAD_DIR = PathLib("static/uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-@router.get("")
-def index():
-    return {"message": "Hello, World!"}
+
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 
 
-# Body - Пример 1
+# Body - Пример 1 
 class Item(BaseModel):
     name: str
     description: Optional[str] = None
     price: float
-    tax: Optional[float] = None
+
 
 @router.post("")
 async def create_item(item: Item):
-    return {"item": item, "message": "Item created successfully"}
+    return {"item": item, "message": "Элемент успешно создан"}
 
-# Query Parameters and String Validations - Пример 2
+# Query Parameters and String Validations - Пример 2 - Параметры запроса query
 @router.get("")
 async def read_items(
     q: Optional[str] = Query(
         None, 
         min_length=3, 
         max_length=50, 
-        description="Query string for search"
+        description="Строка запроса для поиска"
     ),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, le=1000)
 ):
     return {"q": q, "skip": skip, "limit": limit}
 
-# Path Parameters and Numeric Validations - Пример 3
+# Path Parameters and Numeric Validations - Пример 3 - path параметры
 @router.get("/{item_id}")
 async def read_item_path(
-    item_id: int = Path(..., gt=0, description="The ID of the item"),
+    item_id: int = Path(..., gt=0, description="Идентификатор элемента"),
     q: Optional[str] = Query(None)
 ):
     return {"item_id": item_id, "q": q}
 
-# Query Parameter Models - Пример 4
+# Query Parameter Models - Пример 4 - модель как query параметр
 class FilterParams(BaseModel):
     category: Optional[str] = None
     min_price: Optional[float] = None
@@ -65,7 +63,7 @@ class FilterParams(BaseModel):
 async def read_items_models(filter_params: FilterParams = Query(...)):
     return {"filters": filter_params}
 
-# Nested Models - Пример 5
+# Nested Models - Пример 5 - получаем поля формы вместо json (вложенная модель)
 class Image(BaseModel):
     url: str
     name: str
@@ -82,7 +80,7 @@ class NewItem(BaseModel):
 async def create_item_model(item: NewItem):
     return {"item": item}
 
-# Request Forms - Пример 6
+# Request Forms - Пример 6 - поля формы
 @router.post("/login/")
 async def login(
     username: str = Form(...),
@@ -90,14 +88,16 @@ async def login(
 ):
     return {"username": username, "password": "*****"}
 
-# Request Form Models - Пример 7
+# Request Form Models - Пример 7 - модели pydantic для полей формы
 class User(BaseModel):
     username: str
     password: str
 
 @router.post("/register/")
 async def register(user: User = Form(...)):
-    return {"user": user, "message": "Registration successful"}
+    return {"user": user, "message": "Регистрация прошла успешно"}
+
+
 
 @router.get("/test/format/")
 async def format_example(format: str = Query("json", regex="^(json|html)$")):
