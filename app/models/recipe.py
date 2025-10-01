@@ -50,7 +50,6 @@ class Ingredient(Base):
 recipe_allergens = Table(
     "recipe_allergens",
     Base.metadata,
-    # Здесь используем обычный Column!
     Column("recipe_id", Integer, ForeignKey("recipes.id"), primary_key=True),
     Column("allergen_id", Integer, ForeignKey("allergens.id"), primary_key=True)
 )
@@ -79,13 +78,13 @@ class Recipe(Base):
     difficulty: Mapped[int] = mapped_column(Integer, default=1)
     cuisine_id: Mapped[int] = mapped_column(Integer, ForeignKey("cuisines.id"))
 
-    cuisine = relationship("Cuisine", back_populates="recipes")
-    allergens = relationship(
-        "Allergen",
-        secondary=recipe_allergens,
-        back_populates="recipes"
+    cuisine = relationship("Cuisine")
+    allergens: Mapped[list["Allergen"]] = relationship(
+        "Allergen", secondary="recipe_allergens", back_populates="recipes"
     )
-    recipe_ingredients = relationship("RecipeIngredient", back_populates="recipe")
+    recipe_ingredients: Mapped[list["RecipeIngredient"]] = relationship(
+        "RecipeIngredient", back_populates="recipe", cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"Recipe(id={self.id}, title={self.title})"
