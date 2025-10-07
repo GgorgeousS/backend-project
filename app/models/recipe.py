@@ -5,18 +5,7 @@ from sqlalchemy import Column, Integer, ForeignKey, Table
 
 from .base import Base
 
-class MeasurementEnum(IntEnum):
-    GRAMS = 1
-    PIECES = 2
-    MILLILITERS = 3
 
-    @property
-    def label(self) -> str:
-        return {
-            MeasurementEnum.GRAMS: "г",
-            MeasurementEnum.PIECES: "шт",
-            MeasurementEnum.MILLILITERS: "мл",
-        }[self]
 
 class Cuisine(Base):
     __tablename__ = "cuisines"
@@ -62,7 +51,7 @@ class RecipeIngredient(Base):
     recipe_id: Mapped[int] = mapped_column(Integer, ForeignKey("recipes.id"))
     ingredient_id: Mapped[int] = mapped_column(Integer, ForeignKey("ingredients.id"))
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
-    measurement: Mapped[int] = mapped_column(Integer, nullable=False)  # Используйте MeasurementEnum в коде
+    measurement: Mapped[int] = mapped_column(Integer, nullable=False) 
 
     recipe = relationship("Recipe", back_populates="recipe_ingredients")
     ingredient = relationship("Ingredient", back_populates="recipe_ingredients")

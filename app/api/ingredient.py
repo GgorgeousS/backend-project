@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from typing import List
 from .dependencies import SessionDep
-
-from models.recipe import Ingredient
+from schemas.recipe import RecipeRead
+from models.recipe import Allergen, Cuisine, Ingredient, Recipe, RecipeIngredient
 from schemas.ingredient import IngredientCreate, IngredientRead, IngredientUpdate
 
 router = APIRouter(
@@ -50,3 +51,38 @@ async def delete_ingredient(ingredient_id: int, session: SessionDep):
         raise HTTPException(status_code=404, detail="Ingredient not found")
     await session.delete(ingredient)
     await session.commit()
+
+
+
+@router.get(
+    "{ingredient_id}/recipes",
+    status_code=status.HTTP_201_CREATED,
+    response_model=list[RecipeRead],
+)
+async def get_recipes_by_ingredient(
+    session: SessionDep,
+    ingredient_id: int,
+) -> list[RecipeRead]:
+    """Выдает пользователю все его рецепты по тэгу"""
+    stmt = (
+        select(Recipe)
+        .join(Recipe.recipe_ingredients)
+        .where(RecipeIngredient.ingredient_id == ingredient_id)
+        .options(
+            selectinload(Recipe.cuisine),
+            selectinload(Recipe.allergens),
+            selectinload(Recipe.recipe_ingredients).selectinload(
+                RecipeIngredient.ingredient
+            ),
+        )
+        .order_by(Recipe.id)
+    )
+    result = await session.execute(stmt)
+    recipes = result.scalars().all()
+    if not recipes:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Recipes not found"
+        )
+
+    recipe_dto = [RecipeRead.model_validate(recipe) for recipe in recipes]
+    return recipe_dto

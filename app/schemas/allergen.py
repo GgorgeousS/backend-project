@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 
 class AllergenBase(BaseModel):
@@ -17,6 +17,5 @@ class AllergenUpdate(BaseModel):
 
 class AllergenRead(AllergenBase):
     id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        orm_mode = True
